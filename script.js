@@ -5,6 +5,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const todosContainer = document.querySelector('.todos-container');
     const inputArea = document.querySelector('.input-area');
 
+    // Sound effect elements
+    const addSound = document.getElementById('add-sound');
+    const editSound = document.getElementById('edit-sound');
+    const deleteSound = document.getElementById('delete-sound');
+    const completeSound = document.getElementById('complete-sound');
+    const uncheckSound = document.getElementById('uncheck-sound'); // <-- NEW
+    const allCompleteSound = document.getElementById('all-complete-sound');
+    
+
+    const playSound = (audio) => {
+        if (audio) {
+            audio.currentTime = 0;
+            audio.play();
+        }
+    };
+
     const toggleEmptyState = () => {
         emptyImage.style.display = taskList.children.length === 0 ? 'block' : 'none';
         todosContainer.style.width = taskList.children.length > 0 ? '100%' : '50%';
@@ -18,10 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('tasks', JSON.stringify(tasks));
     };
 
-    const loadTasksFromLocalStorage = () => {
-        const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        savedTasks.forEach(({ text, completed }) => addTask(text, completed, false));
-        toggleEmptyState();
+    const checkAllTasksCompleted = () => {
+        const tasks = taskList.querySelectorAll('li');
+        if (tasks.length > 0 && Array.from(tasks).every(li => li.querySelector('.checkbox').checked)) {
+            playSound(allCompleteSound);
+        }
     };
 
     const addTask = (text, completed = false) => {
@@ -51,33 +68,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         checkbox.addEventListener('change', () => {
-            const isChecked = checkbox.checked;
-            li.classList.toggle('completed', isChecked);
-            editBtn.disabled = isChecked; 
-            editBtn.style.opacity = isChecked ? '0.5' : '1';
-            editBtn.style.pointerEvents = isChecked ? 'none' : 'auto';
-            saveTaskToLocalStorage();
-        });
+    const isChecked = checkbox.checked;
+    li.classList.toggle('completed', isChecked);
+    editBtn.disabled = isChecked; 
+    editBtn.style.opacity = isChecked ? '0.5' : '1';
+    editBtn.style.pointerEvents = isChecked ? 'none' : 'auto';
+    saveTaskToLocalStorage();
+if (isChecked) {
 
-        editBtn.addEventListener('click', () => {
-            if(!checkbox.checked) {
-                taskInput.value = li.querySelector('span').textContent;
-                li.remove();
-                toggleEmptyState();
-                saveTaskToLocalStorage();
-            }
-        });
+        const allChecked = Array.from(taskList.querySelectorAll('.checkbox')).every(cb => cb.checked);
+        if (allChecked) {
+            playSound(allCompleteSound);
+        } else {
+            playSound(completeSound);
+        }
+    } else {
+        playSound(uncheckSound);
+    }
+});
 
-        li.querySelector('.delete-btn').addEventListener('click', () => {
-            li.remove();
-            toggleEmptyState();
-            saveTaskToLocalStorage();
-        });
+// ... previous code ...
+const editSound = document.getElementById('edit-sound');
+// ... other audio elements and code ...
+
+editBtn.addEventListener('click', () => {
+    if(!checkbox.checked) {
+        taskInput.value = li.querySelector('span').textContent;
+        li.remove();
+        toggleEmptyState();
+        saveTaskToLocalStorage();
+        playSound(editSound); // play edit sound
+    }
+});
+li.querySelector('.delete-btn').addEventListener('click', () => {
+    li.remove();
+    toggleEmptyState();
+    saveTaskToLocalStorage();
+    playSound(deleteSound);
+    // Do NOT call checkAllTasksCompleted() here
+});
 
         taskList.appendChild(li);
         taskInput.value = '';
         toggleEmptyState();
         saveTaskToLocalStorage();
+        playSound(addSound); // Play add sound here!
     };
 
     inputArea.addEventListener('submit', (e) => {
@@ -93,5 +128,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     toggleEmptyState();
+
+    const loadTasksFromLocalStorage = () => {
+        const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        savedTasks.forEach(({ text, completed }) => addTask(text, completed, false));
+        toggleEmptyState();
+    };
+
     loadTasksFromLocalStorage();
 });

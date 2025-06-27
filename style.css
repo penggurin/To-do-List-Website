@@ -135,6 +135,7 @@ body {
     appearance: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    
 }
 
 #task-list li.checkbox:checked {
@@ -149,6 +150,7 @@ body {
     justify-content: center;
     align-items: center;
     font-size: 1rem;
+    margin-top: -3px
 }
 
 #task-list li span {
