@@ -156,7 +156,9 @@ body {
 #task-list li span {
     flex: 1;
     margin-left: 10px;
-    word-wrap: break-word;
+  white-space: normal;    /* Allows text to wrap */
+  word-break: break-word; /* Breaks long words to fit the container */
+  overflow-wrap: anywhere; /* Ensures overflowed text breaks anywhere if needed */
 }
 
 #task-list li.completed span {
